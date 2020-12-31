@@ -1,7 +1,7 @@
 # webrod
 an easy to use http server for nim
 
-* Based on the HttpHost of the net package of my Java Whiz project https://github.com/j-a-s-d/whiz
+> based on the HttpHost of the net package of my Java Whiz project https://github.com/j-a-s-d/whiz
 
 ## EXAMPLE:
 
@@ -28,8 +28,8 @@ host.start()
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
-31-12-20 - first public release 0.1.0
-17-12-20 - started coding
+* 31-12-20 - first public release 0.1.0
+* 17-12-20 - started coding
 
 ## TODO
 * more features and enhancements
