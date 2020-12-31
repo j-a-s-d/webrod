@@ -8,7 +8,7 @@ export
   httprequest, standardcharsets
 
 const NAME: string = "webrod"
-const VERSION: string = "1.0.0"
+const VERSION: string = "0.1.0"
 
 var
   defaultPort: int = 8080
