@@ -2,13 +2,13 @@
 
 import
   asynchttpserver, asyncdispatch, os, oids,
-  httprequest, mimetypes, simplerouter, standardcharsets
+  httpstand, httprequest, mimetypes, simplerouter, standardcharsets
 
 export
-  httprequest, standardcharsets
+  httpstand, httprequest, standardcharsets
 
 const NAME: string = "webrod"
-const VERSION: string = "0.1.0"
+const VERSION: string = "0.1.1"
 
 var
   defaultPort: int = 8080
@@ -23,12 +23,11 @@ type
   WebRodHttpHost = object
     name: string
     port: int
-    listening: bool
     crossOrigin: bool
     staticFileServer: tuple[enabled: bool, route: string, folder: string]
     mimeTypes: MimeTypes
     router: SimpleRouter
-    server: AsyncHttpServer
+    stand: HttpStand
     id: string
 
   HttpHost* = ref WebRodHttpHost
@@ -37,13 +36,15 @@ proc newHttpHost*(): HttpHost =
   result = new WebRodHttpHost
   result.name = NAME & "/" & VERSION & " (" & hostOS & ")"
   result.port = defaultPort
-  result.listening = false
   result.crossOrigin = false
   result.staticFileServer = (enabled: false, route: "", folder: ".")
   result.mimeTypes = newMimeTypes()
   result.router = newSimpleRouter()
-  result.server = newAsyncHttpServer()
+  result.stand = newHttpStand()
   result.id = $genOid();
+
+proc getStand*(hh: HttpHost): HttpStand =
+  hh.stand
 
 proc getName*(hh: HttpHost): string =
   hh.name
@@ -52,7 +53,7 @@ proc setName*(hh: HttpHost, value: string) =
   hh.name = value
 
 proc isListening*(hh: HttpHost): bool =
-  hh.listening
+  hh.stand.isListening()
 
 proc getCrossOriginAllowance*(hh: HttpHost): bool =
   hh.crossOrigin
@@ -156,15 +157,8 @@ proc dispatchHandler(hh: HttpHost, hr: HttpRequest): Future[void] {.gcsafe.} =
 
 proc start*(hh: HttpHost) =
   proc servingHandler(req: Request): Future[void] {.gcsafe.} =
-    dispatchHandler(hh, newHttpRequest(hh.name, hh.id, hh.crossOrigin, req))
-  asyncCheck hh.server.serve(Port(hh.port), servingHandler)
-  hh.listening = true
-  while hh.isListening():
-    try:
-      poll()
-    except:
-      hh.listening = false
+    dispatchHandler(hh, newHttpRequest(hh.stand, hh.name, hh.id, hh.crossOrigin, req))
+  hh.stand.listen(hh.port, servingHandler)
 
 proc stop*(hh: HttpHost): bool =
-  hh.listening = false
-  hh.server.close()
+  hh.stand.close()

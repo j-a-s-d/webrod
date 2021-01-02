@@ -2,7 +2,7 @@
 
 import
   asynchttpserver, asyncdispatch, uri, cookies, times, json, strtabs, strutils,
-  standardcharsets
+  httpstand, standardcharsets
 
 const DATE_FORMATTING_VALUE: string = "ddd, yyyy-MM-dd hh:mm:ss 'GMT'"
 const NO_CACHE_CONTROL: string = "no-cache, no-store, max-age=0"
@@ -13,6 +13,7 @@ type
     created: float
     req*: Request
     hostid*: string
+    stand: HttpStand
     server: string
     crossOrigin: bool
     cookies: StringTableRef
@@ -20,15 +21,19 @@ type
 
   ReqHandler* = proc (req: HttpRequest): Future[void] {.gcsafe.}
 
-proc newHttpRequest*(server: string, hostid: string, crossorigin: bool, req: Request): HttpRequest =
+proc newHttpRequest*(stand: HttpStand, server: string, hostid: string, crossorigin: bool, req: Request): HttpRequest =
   result.started = cpuTime()
   result.created = epochTime()
   result.cookies = newStringTable()
   result.crossOrigin = crossorigin
   result.server = server
+  result.stand = stand
   result.hostid = hostid
   result.req = req
   result.defCharset = getDefaultCharset()
+
+proc getStand*(hr: HttpRequest): HttpStand =
+  hr.stand
 
 proc getCPUTimeSpent*(hr: HttpRequest): float =
   cpuTime() - hr.started

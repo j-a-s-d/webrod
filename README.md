@@ -28,8 +28,9 @@ host.start()
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
-* 31-12-20 - first public release 0.1.0
-* 17-12-20 - started coding
+* 01-01-20 *[0.1.1]* - added HttpStand
+* 31-12-20 *[0.1.0]* - first public release
+* 17-12-20 *[0.0.1]* - started coding
 
 ## TODO
 * more features and enhancements
