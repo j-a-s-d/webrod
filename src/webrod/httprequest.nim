@@ -14,21 +14,17 @@ type
     req*: Request
     hostid*: string
     stand: HttpStand
-    server: string
-    crossOrigin: bool
     cookies: StringTableRef
     defCharset: string
 
   ReqHandler* = proc (req: HttpRequest): Future[void] {.gcsafe.}
 
-proc newHttpRequest*(stand: HttpStand, server: string, hostid: string, crossorigin: bool, req: Request): HttpRequest =
+proc newHttpRequest*(stand: HttpStand, req: Request): HttpRequest =
   result.started = cpuTime()
   result.created = epochTime()
   result.cookies = newStringTable()
-  result.crossOrigin = crossorigin
-  result.server = server
   result.stand = stand
-  result.hostid = hostid
+  result.hostid = stand.getId()
   result.req = req
   result.defCharset = getDefaultCharset()
 
@@ -78,10 +74,10 @@ proc addResponseCookies*(hr: HttpRequest, cookieTable: StringTableRef) =
 
 proc reply*(hr: HttpRequest, httpCode: HttpCode, textContent: string, httpHeaders: HttpHeaders = newHttpHeaders()) {.async.} =
   httpHeaders["Date"] = now().utc.format(DATE_FORMATTING_VALUE)
-  httpHeaders["Server"] = hr.server
+  httpHeaders["Server"] = hr.stand.getName()
   if not httpHeaders.hasKey("Cache-Control"):
     httpHeaders["Cache-Control"] = NO_CACHE_CONTROL
-  if hr.crossOrigin:
+  if hr.stand.getCrossOriginAllowance():
     httpHeaders["Access-Control-Allow-Origin"] = "*"
   if len(hr.cookies) > 0:
     var c: seq[string] = @[]

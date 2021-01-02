@@ -1,14 +1,14 @@
 # webrod by Javier Santo Domingo (j-a-s-d@coderesearchlabs.com)
 
 import
-  asynchttpserver, asyncdispatch, os, oids,
+  asynchttpserver, asyncdispatch, os,
   httpstand, httprequest, mimetypes, simplerouter, standardcharsets
 
 export
   httpstand, httprequest, standardcharsets
 
 const NAME: string = "webrod"
-const VERSION: string = "0.1.1"
+const VERSION: string = "0.1.2"
 
 var
   defaultPort: int = 8080
@@ -21,45 +21,37 @@ proc setDefaultPort*(value: int) =
 
 type
   WebRodHttpHost = object
-    name: string
-    port: int
-    crossOrigin: bool
     staticFileServer: tuple[enabled: bool, route: string, folder: string]
     mimeTypes: MimeTypes
     router: SimpleRouter
     stand: HttpStand
-    id: string
 
   HttpHost* = ref WebRodHttpHost
 
 proc newHttpHost*(): HttpHost =
   result = new WebRodHttpHost
-  result.name = NAME & "/" & VERSION & " (" & hostOS & ")"
-  result.port = defaultPort
-  result.crossOrigin = false
   result.staticFileServer = (enabled: false, route: "", folder: ".")
   result.mimeTypes = newMimeTypes()
   result.router = newSimpleRouter()
-  result.stand = newHttpStand()
-  result.id = $genOid();
+  result.stand = newHttpStand(NAME & "/" & VERSION & " (" & hostOS & ")", defaultPort)
 
 proc getStand*(hh: HttpHost): HttpStand =
   hh.stand
 
 proc getName*(hh: HttpHost): string =
-  hh.name
+  hh.stand.getName()
 
 proc setName*(hh: HttpHost, value: string) =
-  hh.name = value
+  hh.stand.setName(value)
 
 proc isListening*(hh: HttpHost): bool =
   hh.stand.isListening()
 
 proc getCrossOriginAllowance*(hh: HttpHost): bool =
-  hh.crossOrigin
+  hh.stand.getCrossOriginAllowance()
 
 proc setCrossOriginAllowance*(hh: HttpHost, value: bool) =
-  hh.crossOrigin = value
+  hh.stand.setCrossOriginAllowance(value)
 
 proc isStaticFileServingEnabled*(hh: HttpHost): bool =
   hh.staticFileServer.enabled
@@ -79,14 +71,14 @@ proc disableStaticFileServing*(hh: HttpHost) =
   enableStaticFileServing(hh, "", "")
 
 proc getPort*(hh: HttpHost): int =
-  hh.port
+  hh.stand.getPort()
 
 proc setPort*(hh: HttpHost, value: int) =
-  hh.port = value
+  hh.stand.setPort(value)
 
 proc registerMimeType*(hh: HttpHost, fileExtension: string, contentType: string) =
   hh.mimeTypes.set(fileExtension, contentType)
-  
+
 proc unregisterMimeType*(hh: HttpHost, fileExtension: string) =
   hh.mimeTypes.drop(fileExtension)
 
@@ -157,8 +149,8 @@ proc dispatchHandler(hh: HttpHost, hr: HttpRequest): Future[void] {.gcsafe.} =
 
 proc start*(hh: HttpHost) =
   proc servingHandler(req: Request): Future[void] {.gcsafe.} =
-    dispatchHandler(hh, newHttpRequest(hh.stand, hh.name, hh.id, hh.crossOrigin, req))
-  hh.stand.listen(hh.port, servingHandler)
+    dispatchHandler(hh, newHttpRequest(hh.stand, req))
+  hh.stand.listen(servingHandler)
 
 proc stop*(hh: HttpHost): bool =
   hh.stand.close()
