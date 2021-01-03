@@ -8,7 +8,7 @@ export
   httpstand, httprequest, standardcharsets
 
 const NAME: string = "webrod"
-const VERSION: string = "0.1.2"
+const VERSION: string = "0.1.3"
 
 var
   defaultPort: int = 8080
@@ -46,6 +46,12 @@ proc setName*(hh: HttpHost, value: string) =
 
 proc isListening*(hh: HttpHost): bool =
   hh.stand.isListening()
+
+proc hasError*(hh: HttpHost): bool =
+  hh.stand.hasError()
+
+proc getErrorMessage*(hh: HttpHost): string =
+  hh.stand.getErrorMessage()
 
 proc getCrossOriginAllowance*(hh: HttpHost): bool =
   hh.stand.getCrossOriginAllowance()

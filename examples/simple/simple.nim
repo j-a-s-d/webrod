@@ -21,3 +21,6 @@ host.setPort(5000)
 host.registerGetHandler("/simple", handle_simple)
 host.registerHandler("/shutdown", handle_shutdown)
 host.start()
+if host.hasError():
+  echo host.getErrorMessage()
+

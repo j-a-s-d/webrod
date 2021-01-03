@@ -24,10 +24,13 @@ host.setPort(5000)
 host.registerGetHandler("/simple", handle_simple)
 host.registerHandler("/shutdown", handle_shutdown)
 host.start()
+if host.hasError():
+  echo host.getErrorMessage()
 ```
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 03-01-20 *[0.1.3]* - added hasError and getErrorMessage
 * 02-01-20 *[0.1.2]* - improved HttpStand
 * 01-01-20 *[0.1.1]* - added HttpStand
 * 31-12-20 *[0.1.0]* - first public release
