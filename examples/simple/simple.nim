@@ -10,7 +10,11 @@ var
   host {.threadvar.}: HttpHost
 
 proc handle_simple(hr: HttpRequest) {.async, gcsafe.} =
-  await hr.replyOkAsPrettyJson(%* { "message": "Hi!", "took": hr.getCPUTimeSpentAsString() })
+  await hr.replyOkAsPrettyJson(%* {
+    "message": "Hi!",
+    "took": hr.getCPUTimeSpentAsString(),
+    "online": hr.getStand().getElapsedMinutesSinceCreationAsString()
+  })
 
 proc handle_shutdown(hr: HttpRequest) {.async, gcsafe.} =
   await hr.replyOk("Bye!")

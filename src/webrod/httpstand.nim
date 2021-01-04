@@ -1,7 +1,7 @@
 # webrod by Javier Santo Domingo (j-a-s-d@coderesearchlabs.com)
 
 import
-  asynchttpserver, asyncdispatch, oids, strutils, os
+  asynchttpserver, asyncdispatch, oids, strutils, times
 
 type
   WebRodHttpStand = object
@@ -13,6 +13,7 @@ type
     port: int
     id: string
     crossOrigin: bool
+    created: float
 
   HttpStand* = ref WebRodHttpStand
 
@@ -26,6 +27,13 @@ proc newHttpStand*(name: string, port: int): HttpStand =
   result.port = port
   result.id = $genOid();
   result.crossOrigin = false
+  result.created = epochTime()
+
+proc getElapsedMinutesSinceCreation*(stand: HttpStand): float =
+  (epochTime() - stand.created) / 60
+
+proc getElapsedMinutesSinceCreationAsString*(stand: HttpStand, appendix: string = "m"): string =
+  getElapsedMinutesSinceCreation(stand).formatFloat(format = ffDecimal, precision = 0).replace(".", appendix)
 
 proc getId*(stand: HttpStand): string =
   stand.id

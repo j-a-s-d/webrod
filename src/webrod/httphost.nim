@@ -8,7 +8,7 @@ export
   httpstand, httprequest, standardcharsets
 
 const NAME: string = "webrod"
-const VERSION: string = "0.1.3"
+const VERSION: string = "0.2.0"
 
 var
   defaultPort: int = 8080
@@ -37,6 +37,21 @@ proc newHttpHost*(): HttpHost =
 
 proc getStand*(hh: HttpHost): HttpStand =
   hh.stand
+
+proc getElapsedMinutesSinceCreation*(hh: HttpHost): float =
+  hh.stand.getElapsedMinutesSinceCreation()
+
+proc getElapsedMinutesSinceCreationAsString*(hh: HttpHost, appendix: string = "m"): string =
+  hh.stand.getElapsedMinutesSinceCreationAsString(appendix)
+
+proc getId*(hh: HttpHost): string =
+  hh.stand.getId()
+
+proc getPort*(hh: HttpHost): int =
+  hh.stand.getPort()
+
+proc setPort*(hh: HttpHost, value: int) =
+  hh.stand.setPort(value)
 
 proc getName*(hh: HttpHost): string =
   hh.stand.getName()
@@ -75,12 +90,6 @@ proc enableStaticFileServing*(hh: HttpHost, route: string, folder: string) =
 
 proc disableStaticFileServing*(hh: HttpHost) =
   enableStaticFileServing(hh, "", "")
-
-proc getPort*(hh: HttpHost): int =
-  hh.stand.getPort()
-
-proc setPort*(hh: HttpHost, value: int) =
-  hh.stand.setPort(value)
 
 proc registerMimeType*(hh: HttpHost, fileExtension: string, contentType: string) =
   hh.mimeTypes.set(fileExtension, contentType)
