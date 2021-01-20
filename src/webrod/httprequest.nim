@@ -101,6 +101,12 @@ proc replyOkAsText*(hr: HttpRequest, textContent: string, contentCharset: string
 proc replyOkAsText*(hr: HttpRequest, textContent: string) {.async.} =
   await hr.replyOkAs(textContent, "text/plain", hr.defCharset)
 
+proc replyOkAsRawJson*(hr: HttpRequest, textContent: string, contentCharset: string) {.async.} =
+  await hr.replyOkAs(textContent, "application/json", contentCharset)
+
+proc replyOkAsRawJson*(hr: HttpRequest, textContent: string) {.async.} =
+  await hr.replyOkAs(textContent, "application/json", hr.defCharset)
+
 proc replyOkAsJson*(hr: HttpRequest, jsonContent: JsonNode, contentCharset: string) {.async.} =
   await hr.replyOkAs($jsonContent, "application/json", contentCharset)
 

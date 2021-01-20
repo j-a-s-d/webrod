@@ -23,10 +23,10 @@ proc options*(router: SimpleRouter, route: string): string =
   if router.handlersList.hasKey(route):
     for m in items(router.handlersList[route].methods):
       case m:
-        of HttpGet: result = result & ",GET"
-        of HttpPut: result = result & ",PUT"
-        of HttpPost: result = result & ",POST"
-        of HttpDelete: result = result & ",DELETE"
+        of HttpGet: result &= ",GET"
+        of HttpPut: result &= ",PUT"
+        of HttpPost: result &= ",POST"
+        of HttpDelete: result &= ",DELETE"
         else: discard
 
 proc allowed*(router: SimpleRouter, route: string, httpMethod: HttpMethod): bool =

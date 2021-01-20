@@ -21,6 +21,7 @@ var
 
 proc handle_simple(hr: HttpRequest) {.async, gcsafe.} =
   await hr.replyOkAsPrettyJson(%* {
+    "request": hr.getStand().getProcessedRequestsAmountSinceCreationAsString(),
     "message": "Hi!",
     "took": hr.getCPUTimeSpentAsString(),
     "online": hr.getStand().getElapsedMinutesSinceCreationAsString()
@@ -41,14 +42,18 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 20-01-20 *[0.2.2]*
+	- added getProcessedRequestsAmountSinceCreation and getProcessedRequestsAmountSinceCreationAsString to httpstand and httphost
+* 18-01-20 *[0.2.1]*
+	- added replyOkAsRawJson to httprequest
 * 04-01-20 *[0.2.0]*
-	- added getElapsedMinutesSinceCreation and getElapsedMinutesSinceCreationAsString to HttpStand and HttpHost
+	- added getElapsedMinutesSinceCreation and getElapsedMinutesSinceCreationAsString to httpstand and httphost
 * 03-01-20 *[0.1.3]*
-	- added hasError and getErrorMessage to HttpStand and HttpHost
+	- added hasError and getErrorMessage to httpstand and httphost
 * 02-01-20 *[0.1.2]*
-	- improved HttpStand
+	- improved httpstand
 * 01-01-20 *[0.1.1]*
-	- added HttpStand
+	- added httpstand
 * 31-12-20 *[0.1.0]*
 	- first public release
 * 17-12-20 *[0.0.1]*

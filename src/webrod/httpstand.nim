@@ -14,6 +14,7 @@ type
     id: string
     crossOrigin: bool
     created: float
+    processedRequests: int
 
   HttpStand* = ref WebRodHttpStand
 
@@ -28,6 +29,13 @@ proc newHttpStand*(name: string, port: int): HttpStand =
   result.id = $genOid();
   result.crossOrigin = false
   result.created = epochTime()
+  result.processedRequests = 0
+
+proc getProcessedRequestsAmountSinceCreation*(stand: HttpStand): int =
+  stand.processedRequests
+
+proc getProcessedRequestsAmountSinceCreationAsString*(stand: HttpStand): string =
+  $getProcessedRequestsAmountSinceCreation(stand)
 
 proc getElapsedMinutesSinceCreation*(stand: HttpStand): float =
   (epochTime() - stand.created) / 60
@@ -70,7 +78,10 @@ proc listen*(stand: HttpStand, callback: proc (request: Request): Future[void] {
     stand.error = false
     stand.errorMsg = ""
     stand.listening = true
-    asyncCheck stand.server.serve(Port(stand.port), callback)
+    asyncCheck stand.server.serve(Port(stand.port), proc (request: Request): Future[void] {.gcsafe.} =
+        inc(stand.processedRequests)
+        callback(request)
+    )
     while stand.isListening():
       poll()
   except:

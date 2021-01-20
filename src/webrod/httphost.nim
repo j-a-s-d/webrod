@@ -7,8 +7,9 @@ import
 export
   httpstand, httprequest, standardcharsets
 
-const NAME: string = "webrod"
-const VERSION: string = "0.2.0"
+const
+  NAME: string = "webrod"
+  VERSION: string = "0.2.2"
 
 var
   defaultPort: int = 8080
@@ -37,6 +38,9 @@ proc newHttpHost*(): HttpHost =
 
 proc getStand*(hh: HttpHost): HttpStand =
   hh.stand
+
+proc getProcessedRequestsAmountSinceCreation*(hh: HttpHost): int =
+  hh.stand.getProcessedRequestsAmountSinceCreation()
 
 proc getElapsedMinutesSinceCreation*(hh: HttpHost): float =
   hh.stand.getElapsedMinutesSinceCreation()

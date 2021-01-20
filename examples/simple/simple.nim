@@ -11,6 +11,7 @@ var
 
 proc handle_simple(hr: HttpRequest) {.async, gcsafe.} =
   await hr.replyOkAsPrettyJson(%* {
+    "request": hr.getStand().getProcessedRequestsAmountSinceCreationAsString(),
     "message": "Hi!",
     "took": hr.getCPUTimeSpentAsString(),
     "online": hr.getStand().getElapsedMinutesSinceCreationAsString()
