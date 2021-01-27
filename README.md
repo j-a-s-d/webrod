@@ -42,17 +42,17 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
-* 20-01-20 *[0.2.2]*
+* 20-01-21 *[0.2.2]*
 	- added getProcessedRequestsAmountSinceCreation and getProcessedRequestsAmountSinceCreationAsString to httpstand and httphost
-* 18-01-20 *[0.2.1]*
+* 18-01-21 *[0.2.1]*
 	- added replyOkAsRawJson to httprequest
-* 04-01-20 *[0.2.0]*
+* 04-01-21 *[0.2.0]*
 	- added getElapsedMinutesSinceCreation and getElapsedMinutesSinceCreationAsString to httpstand and httphost
-* 03-01-20 *[0.1.3]*
+* 03-01-21 *[0.1.3]*
 	- added hasError and getErrorMessage to httpstand and httphost
-* 02-01-20 *[0.1.2]*
+* 02-01-21 *[0.1.2]*
 	- improved httpstand
-* 01-01-20 *[0.1.1]*
+* 01-01-21 *[0.1.1]*
 	- added httpstand
 * 31-12-20 *[0.1.0]*
 	- first public release
