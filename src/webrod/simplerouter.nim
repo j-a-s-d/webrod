@@ -2,6 +2,7 @@
 
 import
   asynchttpserver, tables, sets,
+  xam,
   httprequest
 
 type
@@ -48,7 +49,7 @@ proc route*(router: SimpleRouter, reqHandler: ReqHandler): string =
   for k, v in pairs(router.handlersList):
     if v.handler == reqHandler:
       return k
-  return ""
+  return STRINGS_EMPTY
 
 proc set*(router: SimpleRouter, route: string, methods: openarray[HttpMethod], reqHandler: ReqHandler) =
   router.handlersList[route] = HandlerItem(methods: toHashSet(methods), handler: reqHandler)

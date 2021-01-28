@@ -1,7 +1,8 @@
 # webrod by Javier Santo Domingo (j-a-s-d@coderesearchlabs.com)
 
 import
-  asynchttpserver, asyncdispatch, oids, strutils, times
+  asynchttpserver, asyncdispatch, oids, strutils, times,
+  xam
 
 type
   WebRodHttpStand = object
@@ -23,7 +24,7 @@ proc newHttpStand*(name: string, port: int): HttpStand =
   result.server = newAsyncHttpServer()
   result.listening = false
   result.error = false
-  result.errorMsg = ""
+  result.errorMsg = STRINGS_EMPTY
   result.name = name
   result.port = port
   result.id = $genOid();
@@ -40,8 +41,8 @@ proc getProcessedRequestsAmountSinceCreationAsString*(stand: HttpStand): string 
 proc getElapsedMinutesSinceCreation*(stand: HttpStand): float =
   (epochTime() - stand.created) / 60
 
-proc getElapsedMinutesSinceCreationAsString*(stand: HttpStand, appendix: string = "m"): string =
-  getElapsedMinutesSinceCreation(stand).formatFloat(format = ffDecimal, precision = 0).replace(".", appendix)
+proc getElapsedMinutesSinceCreationAsString*(stand: HttpStand, appendix: string = STRINGS_LOWERCASE_M): string =
+  getElapsedMinutesSinceCreation(stand).formatFloat(format = ffDecimal, precision = 0).replace(STRINGS_PERIOD, appendix)
 
 proc getId*(stand: HttpStand): string =
   stand.id
@@ -76,7 +77,7 @@ proc getErrorMessage*(stand: HttpStand): string =
 proc listen*(stand: HttpStand, callback: proc (request: Request): Future[void] {.gcsafe.}) =
   try:
     stand.error = false
-    stand.errorMsg = ""
+    stand.errorMsg = STRINGS_EMPTY
     stand.listening = true
     asyncCheck stand.server.serve(Port(stand.port), proc (request: Request): Future[void] {.gcsafe.} =
         inc(stand.processedRequests)
@@ -87,7 +88,7 @@ proc listen*(stand: HttpStand, callback: proc (request: Request): Future[void] {
   except:
     if stand.listening:
       stand.error = true
-      stand.errorMsg = getCurrentExceptionMsg().split("\n")[0]
+      stand.errorMsg = getCurrentExceptionMsg().split(STRINGS_LF)[0]
     stand.listening = false
 
 proc close*(stand: HttpStand): bool =

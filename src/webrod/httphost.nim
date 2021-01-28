@@ -2,6 +2,7 @@
 
 import
   asynchttpserver, asyncdispatch, os,
+  xam,
   httpstand, httprequest, mimetypes, simplerouter, standardcharsets
 
 export
@@ -9,7 +10,7 @@ export
 
 const
   NAME: string = "webrod"
-  VERSION: string = "0.2.2"
+  VERSION: string = "0.3.0"
 
 var
   defaultPort: int = 8080
@@ -19,6 +20,10 @@ proc getDefaultPort*(): int =
 
 proc setDefaultPort*(value: int) =
   defaultPort = value
+
+const
+  ALLOW: string = "Allow"
+  INDEX_HTM: string = "index.htm"
 
 type
   WebRodHttpHost = object
@@ -31,10 +36,10 @@ type
 
 proc newHttpHost*(): HttpHost =
   result = new WebRodHttpHost
-  result.staticFileServer = (enabled: false, route: "", folder: ".")
+  result.staticFileServer = (enabled: false, route: STRINGS_EMPTY, folder: STRINGS_PERIOD)
   result.mimeTypes = newMimeTypes()
   result.router = newSimpleRouter()
-  result.stand = newHttpStand(NAME & "/" & VERSION & " (" & hostOS & ")", defaultPort)
+  result.stand = newHttpStand(NAME & STRINGS_SLASH & VERSION & STRINGS_SPACE & parenthesize(hostOS), defaultPort)
 
 proc getStand*(hh: HttpHost): HttpStand =
   hh.stand
@@ -45,7 +50,7 @@ proc getProcessedRequestsAmountSinceCreation*(hh: HttpHost): int =
 proc getElapsedMinutesSinceCreation*(hh: HttpHost): float =
   hh.stand.getElapsedMinutesSinceCreation()
 
-proc getElapsedMinutesSinceCreationAsString*(hh: HttpHost, appendix: string = "m"): string =
+proc getElapsedMinutesSinceCreationAsString*(hh: HttpHost, appendix: string = STRINGS_LOWERCASE_M): string =
   hh.stand.getElapsedMinutesSinceCreationAsString(appendix)
 
 proc getId*(hh: HttpHost): string =
@@ -88,12 +93,12 @@ proc getStaticFileServingFolder*(hh: HttpHost): string =
   hh.staticFileServer.folder
 
 proc enableStaticFileServing*(hh: HttpHost, route: string, folder: string) =
-  hh.staticFileServer.enabled = route != "" and folder != ""
-  hh.staticFileServer.folder = if hh.staticFileServer.enabled: folder else: "."
-  hh.staticFileServer.route = if hh.staticFileServer.enabled: route else: ""
+  hh.staticFileServer.enabled = route != STRINGS_EMPTY and folder != STRINGS_EMPTY
+  hh.staticFileServer.folder = if hh.staticFileServer.enabled: folder else: STRINGS_PERIOD
+  hh.staticFileServer.route = if hh.staticFileServer.enabled: route else: STRINGS_EMPTY
 
 proc disableStaticFileServing*(hh: HttpHost) =
-  enableStaticFileServing(hh, "", "")
+  enableStaticFileServing(hh, STRINGS_EMPTY, STRINGS_EMPTY)
 
 proc registerMimeType*(hh: HttpHost, fileExtension: string, contentType: string) =
   hh.mimeTypes.set(fileExtension, contentType)
@@ -147,12 +152,12 @@ proc handleStatic(hr: HttpRequest, path: string, mimeTypes: MimeTypes): Future[v
 proc dispatchHandler(hh: HttpHost, hr: HttpRequest): Future[void] {.gcsafe.} =
   try:
     let rh = hh.router.get(hr.req.url.path)
-    if rh != nil:
+    if assigned(rh):
       case hr.req.reqMethod:
         of HttpHead:
-          return hr.replyOk("")
+          return hr.replyOk(STRINGS_EMPTY)
         of HttpOptions:
-          return hr.replyOk("", newHttpHeaders([("Allow", hh.router.options(hr.req.url.path))]))
+          return hr.replyOk(STRINGS_EMPTY, newHttpHeaders([(ALLOW, hh.router.options(hr.req.url.path))]))
         of HttpTrace:
           return hr.replyOk(hr.req.body)
         else:
@@ -161,7 +166,9 @@ proc dispatchHandler(hh: HttpHost, hr: HttpRequest): Future[void] {.gcsafe.} =
           except:
             return hr.replyBadRequest();
     elif hh.staticFileServer.enabled:
-      return handleStatic(hr, hh.staticFileServer.folder & hr.req.url.path & (if hr.req.url.path == "/": "index.htm" else: ""), hh.mimeTypes)
+      return handleStatic(hr, hh.staticFileServer.folder & hr.req.url.path & (
+        if hr.req.url.path == STRINGS_SLASH: INDEX_HTM else: STRINGS_EMPTY
+      ), hh.mimeTypes)
     return hr.replyNotFound()
   except:
     return hr.replyServerError()

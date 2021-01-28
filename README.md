@@ -42,6 +42,8 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 28-01-21 *[0.3.0]*
+	- added xam dependency
 * 20-01-21 *[0.2.2]*
 	- added getProcessedRequestsAmountSinceCreation and getProcessedRequestsAmountSinceCreationAsString to httpstand and httphost
 * 18-01-21 *[0.2.1]*

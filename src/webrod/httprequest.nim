@@ -2,10 +2,20 @@
 
 import
   asynchttpserver, asyncdispatch, uri, cookies, times, json, strtabs, strutils,
+  xam,
   httpstand, standardcharsets
 
-const DATE_FORMATTING_VALUE: string = "ddd, yyyy-MM-dd hh:mm:ss 'GMT'"
-const NO_CACHE_CONTROL: string = "no-cache, no-store, max-age=0"
+const
+  DATE: string = "Date"
+  DATE_FORMATTING_VALUE: string = "ddd, yyyy-MM-dd hh:mm:ss 'GMT'"
+  NO_CACHE_CONTROL: string = "no-cache, no-store, max-age=0"
+  CACHE_CONTROL: string = "Cache-Control"
+  CONTENT_TYPE: string = "Content-Type"
+  COOKIE: string = "Cookie"
+  COOKIE2: string = "Cookie2"
+  SET_COOKIE: string = "Set-Cookie"
+  SERVER: string = "Server"
+  LOCATION: string = "Location"
 
 type
   HttpRequest* = object
@@ -34,13 +44,13 @@ proc getStand*(hr: HttpRequest): HttpStand =
 proc getCPUTimeSpent*(hr: HttpRequest): float =
   cpuTime() - hr.started
 
-proc getCPUTimeSpentAsString*(hr: HttpRequest, decimals: int = 3, appendix: string = "s"): string =
+proc getCPUTimeSpentAsString*(hr: HttpRequest, decimals: int = 3, appendix: string = STRINGS_LOWERCASE_S): string =
   getCPUTimeSpent(hr).formatFloat(format = ffDecimal, precision = decimals) & appendix
 
 proc getRequestElapsedTime*(hr: HttpRequest): float =
   epochTime() - hr.created
 
-proc getRequestElapsedTimeAsString*(hr: HttpRequest, decimals: int = 3, appendix: string = "s"): string =
+proc getRequestElapsedTimeAsString*(hr: HttpRequest, decimals: int = 3, appendix: string = STRINGS_LOWERCASE_S): string =
   getRequestElapsedTime(hr).formatFloat(format = ffDecimal, precision = decimals) & appendix
 
 proc getRequestBodyAsJson*(hr: HttpRequest): JsonNode =
@@ -51,17 +61,17 @@ proc getRequestBodyAsJson*(hr: HttpRequest): JsonNode =
 
 proc getRequestQueryStringAsStringTable*(hr: HttpRequest): StringTableRef =
   result = newStringTable()
-  let qsp = hr.req.url.query.split("&")
+  let qsp = hr.req.url.query.split(STRINGS_AMPERSAND)
   for i in 0..high(qsp):
-    let tmp = qsp[i].split("=")
+    let tmp = qsp[i].split(STRINGS_EQUAL)
     if tmp.len == 2:
       result[tmp[0]] = tmp[1]
 
 proc getRequestCookiesAsStringTable*(hr: HttpRequest): StringTableRef =
-  if hr.req.headers.hasKey("Cookie"):
-    parseCookies(hr.req.headers["Cookie"])
-  elif hr.req.headers.hasKey("Cookie2"): # NOTE: see RFC 2965
-    parseCookies(hr.req.headers["Cookie2"])
+  if hr.req.headers.hasKey(COOKIE):
+    parseCookies(hr.req.headers[COOKIE])
+  elif hr.req.headers.hasKey(COOKIE2): # NOTE: see RFC 2965
+    parseCookies(hr.req.headers[COOKIE2])
   else:
     newStringTable()
 
@@ -73,24 +83,24 @@ proc addResponseCookies*(hr: HttpRequest, cookieTable: StringTableRef) =
     hr.cookies[k] = encodeUrl(v, true)
 
 proc reply*(hr: HttpRequest, httpCode: HttpCode, textContent: string, httpHeaders: HttpHeaders = newHttpHeaders()) {.async.} =
-  httpHeaders["Date"] = now().utc.format(DATE_FORMATTING_VALUE)
-  httpHeaders["Server"] = hr.stand.getName()
-  if not httpHeaders.hasKey("Cache-Control"):
-    httpHeaders["Cache-Control"] = NO_CACHE_CONTROL
+  httpHeaders[DATE] = now().utc.format(DATE_FORMATTING_VALUE)
+  httpHeaders[SERVER] = hr.stand.getName()
+  if not httpHeaders.hasKey(CACHE_CONTROL):
+    httpHeaders[CACHE_CONTROL] = NO_CACHE_CONTROL
   if hr.stand.getCrossOriginAllowance():
-    httpHeaders["Access-Control-Allow-Origin"] = "*"
+    httpHeaders["Access-Control-Allow-Origin"] = STRINGS_ASTERISK
   if len(hr.cookies) > 0:
     var c: seq[string] = @[]
     for k, v in hr.cookies:
-      c.add(k & "=" & v & ";")
-    httpHeaders["Set-Cookie"] = c
+      c.add(k & STRINGS_EQUAL & v & STRINGS_SEMICOLON)
+    httpHeaders[SET_COOKIE] = c
   await hr.req.respond(httpCode, textContent, httpHeaders)
 
 proc replyOk*(hr: HttpRequest, textContent: string, httpHeaders: HttpHeaders = newHttpHeaders()) {.async.} =
   await hr.reply(Http200, textContent, httpHeaders)
 
 proc replyOkAs*(hr: HttpRequest, textContent: string, contentType: string, contentCharset: string) {.async.} =
-  await hr.replyOk(textContent, newHttpHeaders([("Content-Type", contentType & "; charset=" & contentCharset)]))
+  await hr.replyOk(textContent, newHttpHeaders([(CONTENT_TYPE, contentType & "; charset=" & contentCharset)]))
 
 proc replyOkAs*(hr: HttpRequest, textContent: string, contentType: string) {.async.} =
   await hr.replyOkAs(textContent, contentType, hr.defCharset)
@@ -120,7 +130,7 @@ proc replyOkAsPrettyJson*(hr: HttpRequest, jsonContent: JsonNode) {.async.} =
   await hr.replyOkAs(pretty(jsonContent), "application/json", hr.defCharset)
 
 proc replyRedirection*(hr: HttpRequest, destination: string) {.async.} =
-  await hr.reply(Http301, "", newHttpHeaders([("Location", destination)]))
+  await hr.reply(Http301, STRINGS_EMPTY, newHttpHeaders([(LOCATION, destination)]))
 
 proc replyBadRequest*(hr: HttpRequest) {.async.} =
   await hr.reply(Http400, "Bad Request.")
