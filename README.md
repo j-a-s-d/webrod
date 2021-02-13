@@ -3,7 +3,7 @@ an easy to use http server for nim
 
 ## CHARACTERISTICS
 
-* no external dependencies (just nim)
+* no external dependencies (just nim and xam)
 * self-documenting api (descriptive long proc names)
 * full unit testing (TODO)
 * markdown documentation (TODO)
@@ -42,6 +42,8 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 13-02-21 *[0.3.1]*
+	- updated xam dependency
 * 28-01-21 *[0.3.0]*
 	- added xam dependency
 * 20-01-21 *[0.2.2]*

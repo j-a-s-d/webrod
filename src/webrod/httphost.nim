@@ -8,9 +8,9 @@ import
 export
   httpstand, httprequest, standardcharsets
 
-const
-  NAME: string = "webrod"
-  VERSION: string = "0.3.0"
+let
+  NAME*: string = "webrod"
+  VERSION*: SemanticVersion = newSemanticVersion(0, 3, 1)
 
 var
   defaultPort: int = 8080
@@ -39,7 +39,7 @@ proc newHttpHost*(): HttpHost =
   result.staticFileServer = (enabled: false, route: STRINGS_EMPTY, folder: STRINGS_PERIOD)
   result.mimeTypes = newMimeTypes()
   result.router = newSimpleRouter()
-  result.stand = newHttpStand(NAME & STRINGS_SLASH & VERSION & STRINGS_SPACE & parenthesize(hostOS), defaultPort)
+  result.stand = newHttpStand(NAME & STRINGS_SLASH & $VERSION & STRINGS_SPACE & parenthesize(hostOS), defaultPort)
 
 proc getStand*(hh: HttpHost): HttpStand =
   hh.stand
