@@ -10,7 +10,7 @@ export
 
 let
   NAME*: string = "webrod"
-  VERSION*: SemanticVersion = newSemanticVersion(0, 3, 1)
+  VERSION*: SemanticVersion = newSemanticVersion(0, 3, 2)
 
 var
   defaultPort: int = 8080

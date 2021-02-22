@@ -1,8 +1,5 @@
 # webrod by Javier Santo Domingo (j-a-s-d@coderesearchlabs.com)
 
-import
-  webrod/httphost
+import xam
 
-export
-  httphost
-
+reexport(webrod/httphost, httphost)

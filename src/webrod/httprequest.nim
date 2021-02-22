@@ -54,10 +54,7 @@ proc getRequestElapsedTimeAsString*(hr: HttpRequest, decimals: int = 3, appendix
   getRequestElapsedTime(hr).formatFloat(format = ffDecimal, precision = decimals) & appendix
 
 proc getRequestBodyAsJson*(hr: HttpRequest): JsonNode =
-  try:
-    parseJson(hr.req.body)
-  except:
-    nil
+  tryParseJson(hr.req.body, nil)
 
 proc getRequestQueryStringAsStringTable*(hr: HttpRequest): StringTableRef =
   result = newStringTable()
