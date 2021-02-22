@@ -43,6 +43,7 @@ if host.hasError():
 
 ## HISTORY
 * 22-02-21 *[0.3.2]*
+	- added request validators
 	- updated xam dependency
 * 13-02-21 *[0.3.1]*
 	- updated xam dependency

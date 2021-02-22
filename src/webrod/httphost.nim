@@ -3,10 +3,11 @@
 import
   asynchttpserver, asyncdispatch, os,
   xam,
-  httpstand, httprequest, mimetypes, simplerouter, standardcharsets
+  mimetypes, simplerouter
 
-export
-  httpstand, httprequest, standardcharsets
+reexport(httpstand, httpstand)
+reexport(httprequest, httprequest)
+reexport(standardcharsets, standardcharsets)
 
 let
   NAME*: string = "webrod"
@@ -106,23 +107,23 @@ proc registerMimeType*(hh: HttpHost, fileExtension: string, contentType: string)
 proc unregisterMimeType*(hh: HttpHost, fileExtension: string) =
   hh.mimeTypes.drop(fileExtension)
 
-proc registerHandlerForMethods(hh: HttpHost, methods: openarray[HttpMethod], route: string, reqHandler: ReqHandler) =
-  hh.router.set(route, methods, reqHandler)
+proc registerHandlerForMethods(hh: HttpHost, methods: openarray[HttpMethod], route: string, reqHandler: ReqHandler, reqValidator: ReqValidator) =
+  hh.router.set(route, methods, reqHandler, reqValidator)
 
-proc registerHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler) =
-  hh.registerHandlerForMethods([HttpGet, HttpPost, HttpPut, HttpDelete], route, reqHandler)
+proc registerHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler, reqValidator: ReqValidator = nil) =
+  hh.registerHandlerForMethods([HttpGet, HttpPost, HttpPut, HttpDelete], route, reqHandler, reqValidator)
 
-proc registerGetHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler) =
-  hh.registerHandlerForMethods([HttpGet], route, reqHandler)
+proc registerGetHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler, reqValidator: ReqValidator = nil) =
+  hh.registerHandlerForMethods([HttpGet], route, reqHandler, reqValidator)
 
-proc registerPostHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler) =
-  hh.registerHandlerForMethods([HttpPost], route, reqHandler)
+proc registerPostHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler, reqValidator: ReqValidator = nil) =
+  hh.registerHandlerForMethods([HttpPost], route, reqHandler, reqValidator)
 
-proc registerPutHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler) =
-  hh.registerHandlerForMethods([HttpPut], route, reqHandler)
+proc registerPutHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler, reqValidator: ReqValidator = nil) =
+  hh.registerHandlerForMethods([HttpPut], route, reqHandler, reqValidator)
 
-proc registerDeleteHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler) =
-  hh.registerHandlerForMethods([HttpDelete], route, reqHandler)
+proc registerDeleteHandler*(hh: HttpHost, route: string, reqHandler: ReqHandler, reqValidator: ReqValidator = nil) =
+  hh.registerHandlerForMethods([HttpDelete], route, reqHandler, reqValidator)
 
 proc unregisterHandler*(hh: HttpHost, route: string) =
   hh.router.drop(route)
@@ -161,10 +162,14 @@ proc dispatchHandler(hh: HttpHost, hr: HttpRequest): Future[void] {.gcsafe.} =
         of HttpTrace:
           return hr.replyOk(hr.req.body)
         else:
+          if not hh.router.allowed(hr.req.url.path, hr.req.reqMethod):
+            return hr.replyBadRequest()
+          if not hh.router.validate(hr.req.url.path, hr):
+            return hr.replyBadRequest()
           try:
-            return if hh.router.allowed(hr.req.url.path, hr.req.reqMethod): rh(hr) else: hr.replyBadRequest()
+            return rh(hr)
           except:
-            return hr.replyBadRequest();
+            return hr.replyBadRequest()
     elif hh.staticFileServer.enabled:
       return handleStatic(hr, hh.staticFileServer.folder & hr.req.url.path & (
         if hr.req.url.path == STRINGS_SLASH: INDEX_HTM else: STRINGS_EMPTY

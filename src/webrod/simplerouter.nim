@@ -6,9 +6,11 @@ import
   httprequest
 
 type
-  HandlerItem* = object
-    methods: HashSet[HttpMethod]
-    handler: ReqHandler
+  HandlerItem* = tuple[
+    methods: HashSet[HttpMethod],
+    handler: ReqHandler,
+    validator: ReqValidator
+  ]
 
   WebRodSimpleRouter* = object
     handlersList: Table[string, HandlerItem]
@@ -33,6 +35,12 @@ proc options*(router: SimpleRouter, route: string): string =
 proc allowed*(router: SimpleRouter, route: string, httpMethod: HttpMethod): bool =
   router.handlersList.hasKey(route) and router.handlersList[route].methods.contains(httpMethod)
 
+proc validate*(router: SimpleRouter, route: string, req: HttpRequest): bool =
+  if router.handlersList.hasKey(route):
+    let v = router.handlersList[route]
+    return not assigned(v.validator) or v.validator(req)
+  return false
+
 proc has*(router: SimpleRouter, route: string): bool =
   router.handlersList.hasKey(route)
 
@@ -51,8 +59,8 @@ proc route*(router: SimpleRouter, reqHandler: ReqHandler): string =
       return k
   return STRINGS_EMPTY
 
-proc set*(router: SimpleRouter, route: string, methods: openarray[HttpMethod], reqHandler: ReqHandler) =
-  router.handlersList[route] = HandlerItem(methods: toHashSet(methods), handler: reqHandler)
+proc set*(router: SimpleRouter, route: string, methods: openarray[HttpMethod], reqHandler: ReqHandler, reqValidator: ReqValidator) =
+  router.handlersList[route] = (methods: toHashSet(methods), handler: reqHandler, validator: reqValidator)
 
 proc get*(router: SimpleRouter, route: string): ReqHandler =
   if router.handlersList.hasKey(route): router.handlersList[route].handler else: nil

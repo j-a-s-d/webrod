@@ -27,7 +27,7 @@ type
     cookies: StringTableRef
     defCharset: string
 
-  ReqHandler* = proc (req: HttpRequest): Future[void] {.gcsafe.}
+# HTTP REQUEST IMPLEMENTATION
 
 proc newHttpRequest*(stand: HttpStand, req: Request): HttpRequest =
   result.started = cpuTime()
@@ -146,3 +146,18 @@ proc replyNotImplemented*(hr: HttpRequest) {.async.} =
 
 proc replyServerError*(hr: HttpRequest) {.async.} =
   await hr.reply(Http505, "Internal server error.")
+
+# HTTP REQUEST RELATED
+
+type
+  HttpRequestCallback*[T] = proc (hr: HttpRequest): T {.gcsafe.}
+
+  ReqHandler* = HttpRequestCallback[Future[void]]
+
+  ReqValidator* = HttpRequestCallback[bool]
+
+proc reqBodyJsonValidator*(hr: HttpRequest): bool {.gcsafe.} =
+  assigned(hr.getRequestBodyAsJson())
+
+proc reqBodyNonEmptyStringValidator*(hr: HttpRequest): bool {.gcsafe.} =
+  len(hr.req.body) > 0
