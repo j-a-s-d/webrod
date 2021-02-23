@@ -18,14 +18,16 @@ const
   LOCATION: string = "Location"
 
 type
-  HttpRequest* = object
+  HttpRequest* {.final.} = object
+  #private
     started: float
     created: float
-    req*: Request
-    hostid*: string
     stand: HttpStand
     cookies: StringTableRef
     defCharset: string
+  #public
+    hostid*: string
+    req*: Request
 
 # HTTP REQUEST IMPLEMENTATION
 
@@ -146,18 +148,3 @@ proc replyNotImplemented*(hr: HttpRequest) {.async.} =
 
 proc replyServerError*(hr: HttpRequest) {.async.} =
   await hr.reply(Http505, "Internal server error.")
-
-# HTTP REQUEST RELATED
-
-type
-  HttpRequestCallback*[T] = proc (hr: HttpRequest): T {.gcsafe.}
-
-  ReqHandler* = HttpRequestCallback[Future[void]]
-
-  ReqValidator* = HttpRequestCallback[bool]
-
-proc reqBodyJsonValidator*(hr: HttpRequest): bool {.gcsafe.} =
-  assigned(hr.getRequestBodyAsJson())
-
-proc reqBodyNonEmptyStringValidator*(hr: HttpRequest): bool {.gcsafe.} =
-  len(hr.req.body) > 0

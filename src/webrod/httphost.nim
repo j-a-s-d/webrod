@@ -7,6 +7,8 @@ import
 
 reexport(httpstand, httpstand)
 reexport(httprequest, httprequest)
+reexport(httprequest_callbacks, httprequest_callbacks)
+reexport(httprequest_validators, httprequest_validators)
 reexport(standardcharsets, standardcharsets)
 
 let

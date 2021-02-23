@@ -3,7 +3,7 @@
 import
   asynchttpserver, tables, sets,
   xam,
-  httprequest
+  httprequest, httprequest_callbacks
 
 type
   HandlerItem* = tuple[
