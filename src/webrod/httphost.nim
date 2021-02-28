@@ -13,7 +13,7 @@ reexport(standardcharsets, standardcharsets)
 
 let
   NAME*: string = "webrod"
-  VERSION*: SemanticVersion = newSemanticVersion(0, 4, 0)
+  VERSION*: SemanticVersion = newSemanticVersion(0, 4, 1)
 
 var
   defaultPort: int = 8080

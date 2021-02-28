@@ -42,6 +42,8 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 28-02-21 *[0.4.1]*
+	- updated xam dependency
 * 23-02-21 *[0.4.0]*
 	- improved request validators
 	- updated xam dependency
