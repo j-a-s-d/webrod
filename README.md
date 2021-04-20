@@ -42,6 +42,9 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 20-04-21 *[0.5.0]*
+	- added test.sh shell script file
+	- updated xam dependency
 * 28-02-21 *[0.4.1]*
 	- updated xam dependency
 * 23-02-21 *[0.4.0]*
