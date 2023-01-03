@@ -13,7 +13,7 @@ reexport(standardcharsets, standardcharsets)
 
 let
   NAME*: string = "webrod"
-  VERSION*: SemanticVersion = newSemanticVersion(0, 5, 0)
+  VERSION*: SemanticVersion = newSemanticVersion(0, 5, 1)
 
 var
   defaultPort: int = 8080
@@ -34,6 +34,7 @@ type
     mimeTypes: MimeTypes
     router: SimpleRouter
     stand: HttpStand
+    indexFile: string
 
   HttpHost* = ref WebRodHttpHost
 
@@ -43,6 +44,7 @@ proc newHttpHost*(): HttpHost =
   result.mimeTypes = newMimeTypes()
   result.router = newSimpleRouter()
   result.stand = newHttpStand(NAME & STRINGS_SLASH & $VERSION & STRINGS_SPACE & parenthesize(hostOS), defaultPort)
+  result.indexFile = INDEX_HTM
 
 proc getStand*(hh: HttpHost): HttpStand =
   hh.stand
@@ -64,6 +66,12 @@ proc getPort*(hh: HttpHost): int =
 
 proc setPort*(hh: HttpHost, value: int) =
   hh.stand.setPort(value)
+
+proc getIndexFile*(hh: HttpHost): string =
+  hh.indexFile
+
+proc setIndexFile*(hh: HttpHost, value: string) =
+  hh.indexFile = value
 
 proc getName*(hh: HttpHost): string =
   hh.stand.getName()
@@ -173,9 +181,12 @@ proc dispatchHandler(hh: HttpHost, hr: HttpRequest): Future[void] {.gcsafe.} =
           except:
             return hr.replyBadRequest()
     elif hh.staticFileServer.enabled:
-      return handleStatic(hr, hh.staticFileServer.folder & hr.req.url.path & (
-        if hr.req.url.path == STRINGS_SLASH: INDEX_HTM else: STRINGS_EMPTY
-      ), hh.mimeTypes)
+      let p = hr.req.url.path
+      let sf = hh.staticFileServer.folder & p
+      if p.len > 0 and p[^1] == CHARS_SLASH:
+        let cf = sf & hh.indexFile
+        return handleStatic(hr, if existsFile(cf): cf else: sf & INDEX_HTM, hh.mimeTypes)
+      return handleStatic(hr, sf, hh.mimeTypes)
     return hr.replyNotFound()
   except:
     return hr.replyServerError()

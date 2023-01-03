@@ -42,6 +42,9 @@ if host.hasError():
 *NOTE: compile with the compiler 'threads' flag on*
 
 ## HISTORY
+* 03-01-23 *[0.5.1]*
+	- added getIndexFile and setIndexFile to httphost
+	- updated xam dependency
 * 20-04-21 *[0.5.0]*
 	- added test.sh shell script file
 	- updated xam dependency
